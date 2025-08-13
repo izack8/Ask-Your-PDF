@@ -2,3 +2,6 @@ langchain-text-splitters
 langchain-community 
 langgraph
 langchain-deepseek
+langchain-openai
+python-dotenv
+langchain-chroma
