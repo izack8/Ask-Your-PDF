@@ -1,0 +1,11 @@
+{
+  "embedding_provider": "openai",
+  "embedding_model": "text-embedding-3-large",
+  "llm_provider": "deepseek",
+  "llm_model": "deepseek-chat",
+  "collection_name": "documents",
+  "persist_directory": "./chroma_db",
+  "chunk_size": 1000,
+  "chunk_overlap": 200,
+  "temperature": 0.1
+}

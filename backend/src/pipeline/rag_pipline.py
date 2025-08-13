@@ -1,13 +1,13 @@
 from typing import List, Optional
 from langchain.schema import Document
 
-from src.ingestion.document_loader import create_document_loader
-from src.ingestion.text_splitter import create_text_splitter
-from src.ingestion.embedding_generator import create_embedding_generator
-from src.retrieval.vector_store import create_vector_store
-from src.retrieval.retriever import Retriever
-from src.generation.llm_client import create_llm_client
-from src.generation.prompt_templates import RAGPromptTemplate
+from backend.src.ingestion.document_loader import create_document_loader
+from backend.src.ingestion.text_splitter import create_text_splitter
+from backend.src.ingestion.embedding_generator import create_embedding_generator
+from backend.src.retrieval.vector_store import create_vector_store
+from backend.src.retrieval.retriever import Retriever
+from backend.src.generation.llm_client import create_llm_client
+from backend.src.generation.prompt_templates import RAGPromptTemplate
 
 class RAGPipeline:
     """Main RAG pipeline orchestrating the entire flow"""
@@ -153,7 +153,7 @@ class RAGPipeline:
 def create_rag_pipeline(config_path: str = None) -> RAGPipeline:
     """Factory function to create RAG pipeline with configuration"""
     if config_path:
-        # Load config from file
+       
         import json
         with open(config_path, 'r') as f:
             config = json.load(f)

@@ -101,7 +101,6 @@ class OpenAILLMClient(LLMClientInterface):
         messages = [HumanMessage(content=prompt)]
         return self.generate_response(messages)
 
-# Factory function
 def create_llm_client(provider: str = "deepseek", **kwargs) -> LLMClientInterface:
     """Factory function to create LLM clients"""
     if provider.lower() == "deepseek":

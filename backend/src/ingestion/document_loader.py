@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import List
-import fitz  # PyMuPDF - add this import
+import fitz
 from langchain.schema import Document
 
 class DocumentLoaderInterface(ABC):

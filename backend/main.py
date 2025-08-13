@@ -1,33 +1,22 @@
-from src.pipeline.rag_pipline import create_rag_pipeline
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+
+from backend.src.pipeline.rag_pipline import create_rag_pipeline
 import streamlit as st
 
 def main():
     st.title("RAG Pipeline Demo")
     
-    # Load configuration
-    config = {
-        "embedding_provider": "openai",
-        "embedding_model": "text-embedding-3-large",
-        "collection_name": "documents",
-        "persist_directory": "./chroma_db",
-        "splitter_type": "recursive",
-        "chunk_size": 1000,
-        "chunk_overlap": 200,
-        "llm_provider": "deepseek",
-        "llm_model": "deepseek-chat",
-        "temperature": 0.1
-    }
+    path = "settings.json"
     
-    # Initialize RAG pipeline
-    rag_pipeline = create_rag_pipeline()
+    rag_pipeline = create_rag_pipeline(config_path=path)
 
-    # Ingest document
     file_path = st.text_input("Enter the path of the document to ingest:")
     if st.button("Ingest Document"):
         rag_pipeline.ingest_document(file_path)
         st.success("Document ingested successfully!")
 
-    # Query
     question = st.text_input("Enter your question:")
     if st.button("Ask Question"):
         response = rag_pipeline.query(question)

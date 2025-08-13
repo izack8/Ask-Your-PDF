@@ -5,3 +5,5 @@ langchain-deepseek
 langchain-openai
 python-dotenv
 langchain-chroma
+streamlit
+pymupdf
