@@ -7,8 +7,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-RUN python create_isaac_vector_store.py
-
 EXPOSE 8080
 
-CMD ["streamlit", "run", "main.py", "--server.address", "0.0.0.0", "--server.port", "8080"]
+CMD ["sh", "-c", "python create_isaac_vector_store.py && streamlit run main.py --server.address 0.0.0.0 --server.port 8501"]
