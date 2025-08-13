@@ -7,7 +7,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-RUN python create_isaac_vector_store.py
+# RUN python create_isaac_vector_store.py
 
 EXPOSE 8080
 

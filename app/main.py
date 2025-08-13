@@ -1,4 +1,4 @@
-from src.pipeline.rag_pipline import create_rag_pipeline
+from src.pipeline.rag_pipeline import create_rag_pipeline
 import streamlit as st
 import random
 import time
