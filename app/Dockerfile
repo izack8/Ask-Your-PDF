@@ -9,4 +9,4 @@ COPY . .
 
 EXPOSE 8080
 
-CMD ["sh", "-c", "python create_isaac_vector_store.py && streamlit run main.py --server.address 0.0.0.0 --server.port 8501"]
+CMD ["sh", "-c", "python create_isaac_vector_store.py && streamlit run main.py --server.address 0.0.0.0 --server.port 8080"]
