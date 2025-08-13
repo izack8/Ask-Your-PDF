@@ -172,3 +172,8 @@ def create_rag_pipeline(config_path: str = None) -> RAGPipeline:
         }
     
     return RAGPipeline(config)
+
+def create_isaac_vector_store(file_path: str) -> None:
+    """Create vector store from document"""
+    rag_pipeline = create_rag_pipeline()
+    rag_pipeline.ingest_document(file_path=file_path)
