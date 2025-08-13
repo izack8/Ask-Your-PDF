@@ -1,4 +1,4 @@
-from backend.src.retrieval.vector_store import VectorStoreInterface
+from src.retrieval.vector_store import VectorStoreInterface
 
 class Retriever:
     def __init__(self, vector_store: VectorStoreInterface, reranker=None):

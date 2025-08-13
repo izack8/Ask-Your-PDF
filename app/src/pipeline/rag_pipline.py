@@ -1,13 +1,13 @@
 from typing import List, Optional
 from langchain.schema import Document
 
-from backend.src.ingestion.document_loader import create_document_loader
-from backend.src.ingestion.text_splitter import create_text_splitter
-from backend.src.ingestion.embedding_generator import create_embedding_generator
-from backend.src.retrieval.vector_store import create_vector_store
-from backend.src.retrieval.retriever import Retriever
-from backend.src.generation.llm_client import create_llm_client
-from backend.src.generation.prompt_templates import RAGPromptTemplate
+from src.ingestion.document_loader import create_document_loader
+from src.ingestion.text_splitter import create_text_splitter
+from src.ingestion.embedding_generator import create_embedding_generator
+from src.retrieval.vector_store import create_vector_store
+from src.retrieval.retriever import Retriever
+from src.generation.llm_client import create_llm_client
+from src.generation.prompt_templates import RAGPromptTemplate
 
 class RAGPipeline:
     """Main RAG pipeline orchestrating the entire flow"""
