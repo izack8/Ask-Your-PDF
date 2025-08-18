@@ -30,7 +30,7 @@ class RAGPipeline:
         # Vector store
         self.vector_store = create_vector_store(
             collection_name=self.config.get("collection_name", "documents"),
-            embedding_function=self.embeddings.embeddings,
+            embedding_function=self.embeddings.embeddings._embeddings,
             persist_directory=self.config.get("persist_directory", "./chroma_db")
         )
         
