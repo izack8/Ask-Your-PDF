@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from typing import List, Optional
 from langchain_chroma import Chroma
 from langchain.schema import Document
-from 
+from langchain_mongodb import MongoDBAtlasVectorSearch
 
 class VectorStoreInterface(ABC):
     """Abstract base class for vector stores"""
@@ -76,28 +76,60 @@ class ChromaVectorStore(VectorStoreInterface):
         return self._store
 
 class MongoDBVectorStore(VectorStoreInterface):
-    """MongoDB vector store implementation"""
-    
+
     def __init__(self, 
                  collection_name: str,
-                 embedding_function,
-                 persist_directory: Optional[str] = None):
+                 embedding_provider,
+                 persist_directory: str = "./mongo_db"):
         self.collection_name = collection_name
-        self.embedding_function = embedding_function
+        self.embedding_provider = embedding_provider
         self.persist_directory = persist_directory
-        # MongoDB initialization logic would go here
+        self._store = None
+        self._initialize_store()
+    
+    def _initialize_store(self) -> None:
+        """Initialize the MongoDB vector store"""
+        try:
+            self._store = MongoDBAtlasVectorSearch(
+                collection_name=self.collection_name,
+                embedding_function=self.embedding_provider,
+                persist_directory=self.persist_directory,
+            )
+        except Exception as e:
+            raise ConnectionError(f"Failed to initialize MongoDB store: {e}")
     
     def add_documents(self, documents: List[Document]) -> None:
-        """Add documents to the MongoDB vector store"""
-        pass  # Implement MongoDB logic here
-    
+        """Add documents to the vector store"""
+        if not documents:
+            raise ValueError("Documents list cannot be empty")
+
+        try:
+            self._store.add_documents(documents)
+        except Exception as e:
+            raise RuntimeError(f"Failed to add documents: {e}")
+
+
     def similarity_search(self, query: str, k: int = 5) -> List[Document]:
-        """Perform similarity search in MongoDB"""
-        pass  # Implement MongoDB logic here
-    
+        """Perform similarity search"""
+        if not query.strip():
+            raise ValueError("Query cannot be empty")
+
+        try:
+            return self._store.similarity_search(query, k=k)
+        except Exception as e:
+            raise RuntimeError(f"Search failed: {e}")
+
     def delete_collection(self) -> None:
-        """Delete the MongoDB collection"""
-        pass  # Implement MongoDB logic here
+        """Delete the collection"""
+        try:
+            self._store.delete_collection()
+        except Exception as e:
+            raise RuntimeError(f"Failed to delete collection: {e}")
+    
+    @property
+    def store(self) -> MongoDBAtlasVectorSearch:
+        """Access to underlying MongoDB store"""
+        return self._store
 
 class VectorStore:
 
@@ -122,23 +154,23 @@ class VectorStore:
     
 # Factory function for easy instantiation
 def create_vector_store(
-    collection_name: str,
+    collection_name: str, 
     embedding_function,
     persist_directory: Optional[str] = None,
-    vector_store_type: str = "chroma"
+    vector_store_type: str = "chroma", **kwargs
 ) -> VectorStoreInterface:
     """Factory function to create a vector store instance"""
     if vector_store_type.lower() == "chroma":
-        return ChromaVectorStore(
+        return VectorStore(ChromaVectorStore(
             collection_name=collection_name,
             embedding_function=embedding_function,
-            persist_directory=persist_directory
-        )
+            persist_directory=persist_directory or "./chroma_db"
+        ))
     elif vector_store_type.lower() == "mongodb":
-        return MongoDBVectorStore(
+        return VectorStore(MongoDBVectorStore(
             collection_name=collection_name,
-            embedding_function=embedding_function,
-            persist_directory=persist_directory
-        )
-    else:
-        raise ValueError(f"Unsupported vector store type: {vector_store_type}")
+            embedding_provider=embedding_function,
+            persist_directory=persist_directory or "./mongo_db"
+        ))
+    
+    raise ValueError(f"Unsupported vector store type: {vector_store_type}")
