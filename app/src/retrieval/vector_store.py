@@ -1,33 +1,51 @@
 from abc import ABC, abstractmethod
 from typing import List, Optional
 from langchain_chroma import Chroma
-from langchain.schema import Document
 from langchain_mongodb import MongoDBAtlasVectorSearch
+from langchain.schema import Document
 
 class VectorStoreInterface(ABC):
-    """Abstract base class for vector stores"""
-    
+    """Interface for vector stores"""
     @abstractmethod
     def add_documents(self, documents: List[Document]) -> None:
-        pass
-    
+        ...
+
     @abstractmethod
     def similarity_search(self, query: str, k: int = 5) -> List[Document]:
-        pass
-    
+        ...
+
     @abstractmethod
     def delete_collection(self) -> None:
-        pass
+        ...
+
+class VectorStore():
+    """Base class for vector stores"""
+
+    def __init__(self, provider: VectorStoreInterface):
+        self.provider = provider
+
+    def add_documents(self, documents: List[Document]) -> None:
+        self.provider.add_documents(documents)
+
+    def similarity_search(self, query: str, k: int = 5) -> List[Document]:
+        return self.provider.similarity_search(query, k=k)
+
+    def delete_collection(self) -> None:
+        self.provider.delete_collection()
+
+    def set_vector_store(self, vector_store: VectorStoreInterface):
+        """Set a new vector store implementation"""
+        self.provider = vector_store
 
 class ChromaVectorStore(VectorStoreInterface):
     """Chroma vector store implementation"""
     
     def __init__(self, 
                  collection_name: str,
-                 embedding_function,
+                 embedding_provider,
                  persist_directory: str = "./chroma_db"):
         self.collection_name = collection_name
-        self.embedding_function = embedding_function
+        self.embedding_provider = embedding_provider
         self.persist_directory = persist_directory
         self._store = None
         self._initialize_store()
@@ -37,7 +55,7 @@ class ChromaVectorStore(VectorStoreInterface):
         try:
             self._store = Chroma(
                 collection_name=self.collection_name,
-                embedding_function=self.embedding_function,
+                embedding_function=self.embedding_provider,
                 persist_directory=self.persist_directory,
             )
         except Exception as e:
@@ -79,10 +97,10 @@ class MongoDBVectorStore(VectorStoreInterface):
 
     def __init__(self, 
                  collection_name: str,
-                 embedding_provider,
+                 embedding_function,
                  persist_directory: str = "./mongo_db"):
         self.collection_name = collection_name
-        self.embedding_provider = embedding_provider
+        self.embedding_function = embedding_function
         self.persist_directory = persist_directory
         self._store = None
         self._initialize_store()
@@ -92,8 +110,8 @@ class MongoDBVectorStore(VectorStoreInterface):
         try:
             self._store = MongoDBAtlasVectorSearch(
                 collection_name=self.collection_name,
-                embedding_function=self.embedding_provider,
-                persist_directory=self.persist_directory,
+                embedding_function=self.embedding_function,
+                persist_directory=self.persist_directory
             )
         except Exception as e:
             raise ConnectionError(f"Failed to initialize MongoDB store: {e}")
@@ -132,6 +150,7 @@ class MongoDBVectorStore(VectorStoreInterface):
         return self._store
 
 class VectorStore:
+    """Wrapper class for vector store operations"""
 
     def __init__(self, vector_store: VectorStoreInterface):
         self._vector_store = vector_store
@@ -151,7 +170,7 @@ class VectorStore:
     def set_vector_store(self, vector_store: VectorStoreInterface):
         """Set a new vector store implementation"""
         self._vector_store = vector_store
-    
+
 # Factory function for easy instantiation
 def create_vector_store(
     collection_name: str, 
