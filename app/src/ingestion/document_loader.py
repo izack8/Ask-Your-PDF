@@ -84,7 +84,7 @@ class DocumentLoader:
     def __init__(self, loader: DocumentLoaderInterface):
         self.loader = loader
     
-    def load_documents(self) -> List[Document]:
+    def load(self) -> List[Document]:
         """Load documents using the specified loader"""
         try:
             return self.loader.load()
