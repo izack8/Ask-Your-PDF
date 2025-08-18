@@ -58,11 +58,28 @@ class OpenAIEmbeddingGenerator(EmbeddingGeneratorInterface):
             return self._embeddings.embed_query(text)
         except Exception as e:
             raise RuntimeError(f"Failed to embed query: {e}")
+        
+class EmbeddingGenerator:
+
+    def __init__(self, embedding_generator: EmbeddingGeneratorInterface):
+        self._embedding_generator = embedding_generator
+    
+    def generate_embeddings(self, texts: List[str]) -> List[List[float]]:
+        """Generate embeddings for a list of texts"""
+        return self._embedding_generator.generate_embeddings(texts)
+    
+    def embed_query(self, text: str) -> List[float]:
+        """Generate embedding for a single query"""
+        return self._embedding_generator.embed_query(text)
+    
+    def set_embedding_generator(self, embedding_generator: EmbeddingGeneratorInterface):
+        """Set a new embedding generator"""
+        self._embedding_generator = embedding_generator
 
 # Factory function for easy instantiation
 def create_embedding_generator(provider: str = "openai", **kwargs) -> EmbeddingGeneratorInterface:
     """Factory function to create embedding generators"""
     if provider.lower() == "openai":
-        return OpenAIEmbeddingGenerator(**kwargs)
+        return EmbeddingGenerator(OpenAIEmbeddingGenerator(**kwargs))
     else:
         raise ValueError(f"Unsupported embedding provider: {provider}")

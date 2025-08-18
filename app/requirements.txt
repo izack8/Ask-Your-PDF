@@ -7,3 +7,5 @@ python-dotenv
 langchain-chroma
 streamlit
 pymupdf
+langchain-mongodb 
+pymongo
