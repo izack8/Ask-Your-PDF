@@ -8,6 +8,7 @@ from src.retrieval.vector_store import create_vector_store
 from src.retrieval.retriever import Retriever
 from src.generation.llm_client import create_llm_client
 from src.generation.prompt_templates import RAGPromptTemplate
+from src.utils.utils import extract_links, fetch_url_content
 
 class RAGPipeline:
     """Main RAG pipeline orchestrating the entire flow"""
@@ -78,7 +79,8 @@ class RAGPipeline:
         """Query the RAG system"""
         try:
             # Retrieve relevant documents
-            relevant_docs = self.retriever.retrieve(question, k=k)
+            relevant_docs = self.retriever.retrieve(question, k=1)
+            print(relevant_docs)
             
             if not relevant_docs:
                 return {
@@ -87,8 +89,13 @@ class RAGPipeline:
                     "confidence": 0.0
                 }
             
-            # Format context
-            context = self._format_context(relevant_docs)
+            if extract_links(relevant_docs[0].page_content):
+                # If links are found, extract and format them
+                links = extract_links(relevant_docs[0].page_content)
+                context = fetch_url_content(links[0]) if links else ""
+            else:
+                # Format context without links
+                context = self._format_context(relevant_docs)
             
             # Generate prompt
             prompt = self.prompt_template.create_prompt(question, context)
