@@ -52,10 +52,52 @@ class PDFLoader(DocumentLoaderInterface):
             
         except Exception as e:
             raise RuntimeError(f"Failed to load PDF {self.file_path}: {e}")
+    
+
+class ExcelLoader(DocumentLoaderInterface):
+    def __init__(self, file_path: str):
+        self.file_path = file_path
+    
+    def load(self) -> List[Document]:
+        try:
+            import pandas as pd
+            df = pd.read_excel(self.file_path)
+            documents = []
+            
+            for index, row in df.iterrows():
+                content = row.to_string()
+                metadata = {
+                    "source": self.file_path,
+                    "row": index + 1
+                }
+                documents.append(Document(
+                    page_content=content,
+                    metadata=metadata
+                ))
+            
+            return documents
+            
+        except Exception as e:
+            raise RuntimeError(f"Failed to load Excel {self.file_path}: {e}")
+        
+class DocumentLoader:
+    def __init__(self, loader: DocumentLoaderInterface):
+        self.loader = loader
+    
+    def load_documents(self) -> List[Document]:
+        """Load documents using the specified loader"""
+        try:
+            return self.loader.load()
+        except Exception as e:
+            raise RuntimeError(f"Failed to load documents: {e}")
+    
+    def set_loader(self, loader: DocumentLoaderInterface):
+        """Set a new document loader"""
+        self.loader = loader
 
 # Factory function
 def create_document_loader(file_path: str) -> DocumentLoaderInterface:
     if file_path.lower().endswith('.pdf'):
-        return PDFLoader(file_path)
-    else:
-        raise ValueError(f"Unsupported file format: {file_path}")
+        return DocumentLoader(PDFLoader(file_path))
+    elif file_path.lower().endswith(('.xls', '.xlsx')):
+        return DocumentLoader(ExcelLoader(file_path))

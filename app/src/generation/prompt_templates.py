@@ -5,4 +5,5 @@ class RAGPromptTemplate:
         """Create a prompt for the LLM"""
         return f"Question: {question}\nContext: {context}\nAnswer:"
     
+    
 
