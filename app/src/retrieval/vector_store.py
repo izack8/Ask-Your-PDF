@@ -18,25 +18,6 @@ class VectorStoreInterface(ABC):
     def delete_collection(self) -> None:
         ...
 
-class VectorStore():
-    """Base class for vector stores"""
-
-    def __init__(self, provider: VectorStoreInterface):
-        self.provider = provider
-
-    def add_documents(self, documents: List[Document]) -> None:
-        self.provider.add_documents(documents)
-
-    def similarity_search(self, query: str, k: int = 5) -> List[Document]:
-        return self.provider.similarity_search(query, k=k)
-
-    def delete_collection(self) -> None:
-        self.provider.delete_collection()
-
-    def set_vector_store(self, vector_store: VectorStoreInterface):
-        """Set a new vector store implementation"""
-        self.provider = vector_store
-
 class ChromaVectorStore(VectorStoreInterface):
     """Chroma vector store implementation"""
     
@@ -149,27 +130,34 @@ class MongoDBVectorStore(VectorStoreInterface):
         """Access to underlying MongoDB store"""
         return self._store
 
-class VectorStore:
-    """Wrapper class for vector store operations"""
+class VectorStore():
+    """Base class for vector stores"""
 
-    def __init__(self, vector_store: VectorStoreInterface):
-        self._vector_store = vector_store
-    
+    def __init__(self, provider: VectorStoreInterface):
+        self.provider = provider
+
     def add_documents(self, documents: List[Document]) -> None:
-        """Add documents to the vector store"""
-        self._vector_store.add_documents(documents)
-    
+        self.provider.add_documents(documents)
+
     def similarity_search(self, query: str, k: int = 5) -> List[Document]:
-        """Perform similarity search"""
-        return self._vector_store.similarity_search(query, k)
-    
+        return self.provider.similarity_search(query, k=k)
+
     def delete_collection(self) -> None:
-        """Delete the vector store collection"""
-        self._vector_store.delete_collection()
+        self.provider.delete_collection()
+    
+    def get_vector_store(self) -> VectorStoreInterface:
+        """Get the underlying vector store implementation"""
+        return self.provider
 
     def set_vector_store(self, vector_store: VectorStoreInterface):
         """Set a new vector store implementation"""
-        self._vector_store = vector_store
+        self.provider = vector_store
+
+    @property
+    def store(self) -> VectorStoreInterface:
+        """Access to the underlying vector store"""
+        return self.provider.store
+
 
 # Factory function for easy instantiation
 def create_vector_store(
@@ -188,7 +176,7 @@ def create_vector_store(
     elif vector_store_type.lower() == "mongodb":
         return VectorStore(MongoDBVectorStore(
             collection_name=collection_name,
-            embedding_provider=embedding_function,
+            embedding_function=embedding_function,
             persist_directory=persist_directory or "./mongo_db"
         ))
     

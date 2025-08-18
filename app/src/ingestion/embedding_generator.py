@@ -18,10 +18,6 @@ class EmbeddingGeneratorInterface(ABC):
     def embed_query(self, text: str) -> List[float]:
         """Generate embedding for a single query"""
         ...
-    @abstractmethod
-    def get_embeddings(self):
-        """Get the underlying embeddings object"""
-        ...
 
 class OpenAIEmbeddingGenerator(EmbeddingGeneratorInterface):
     """OpenAI embedding generator implementation"""
@@ -63,8 +59,9 @@ class OpenAIEmbeddingGenerator(EmbeddingGeneratorInterface):
         except Exception as e:
             raise RuntimeError(f"Failed to embed query: {e}")
     
-    def get_embeddings(self):
-        """Get the underlying embeddings object"""
+    @property
+    def embeddings(self):
+        """Get the underlying OpenAI embeddings object"""
         return self._embeddings
         
 class EmbeddingGenerator:
@@ -84,9 +81,10 @@ class EmbeddingGenerator:
         """Set a new embedding generator"""
         self._embedding_generator = embedding_generator
     
-    def get_embeddings(self):
-        """Get the underlying embeddings object"""
-        return self._embedding_generator.get_embeddings()
+    @property
+    def embeddings(self) -> EmbeddingGeneratorInterface:
+        """Access the underlying embedding generator"""
+        return self._embedding_generator
 
 # Factory function for easy instantiation
 def create_embedding_generator(provider: str = "openai", **kwargs) -> EmbeddingGeneratorInterface:

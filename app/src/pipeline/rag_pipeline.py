@@ -29,7 +29,7 @@ class RAGPipeline:
         # Vector store
         self.vector_store = create_vector_store(
             collection_name=self.config.get("collection_name", "documents"),
-            embedding_function=self.embeddings.get_embeddings(),
+            embedding_function=self.embeddings.embeddings,
             persist_directory=self.config.get("persist_directory", "./chroma_db")
         )
         
@@ -148,6 +148,68 @@ class RAGPipeline:
             print("Vector store cleared successfully")
         except Exception as e:
             raise RuntimeError(f"Failed to clear vector store: {e}")
+        
+class RAGPipelineBuilder:
+    """Builder class for RAG pipeline configuration"""
+    
+    def __init__(self, embedding_provider: str = "openai",
+                 embedding_model: str = "text-embedding-3-large",
+                    llm_provider: str = "deepseek",
+                    llm_model: str = "deepseek-chat",
+                    collection_name: str = "documents",
+                    persist_directory: str = "./chroma_db",
+                    chunk_size: int = 1000,
+                    chunk_overlap: int = 200,
+                    temperature: float = 0.1):
+        self.embedding_provider = embedding_provider
+        self.embedding_model = embedding_model
+        self.llm_provider = llm_provider
+        self.llm_model = llm_model
+        self.collection_name = collection_name
+        self.persist_directory = persist_directory
+        self.chunk_size = chunk_size
+        self.chunk_overlap = chunk_overlap
+        self.temperature = temperature
+    
+    def set_embedding_provider(self, embedding_provider: str) -> 'RAGPipelineBuilder':
+        self.embedding_provider = embedding_provider
+        return self
+    
+    def set_embedding_model(self, model: str) -> 'RAGPipelineBuilder':
+        self.embedding_model = model
+        return self
+    
+    def set_llm_provider(self, llm_provider: str) -> 'RAGPipelineBuilder':
+        self.llm_provider = llm_provider
+        return self
+    
+    def set_llm_model(self, model: str) -> 'RAGPipelineBuilder':
+        self.llm_model = model
+        return self
+    
+    def set_collection_name(self, collection_name: str) -> 'RAGPipelineBuilder':
+        self.collection_name = collection_name
+        return self
+    
+    def set_persist_directory(self, persit_directory: str) -> 'RAGPipelineBuilder':
+        self.persist_directory = persit_directory
+        return self
+    
+    def set_chunk_size(self, chunk_size: int) -> 'RAGPipelineBuilder':
+        self.chunk_size = chunk_size
+        return self
+    
+    def set_chunk_overlap(self, chunk_overlap: int) -> 'RAGPipelineBuilder':
+        self.chunk_overlap = chunk_overlap
+        return self
+    
+    def set_temperature(self, temperature: float) -> 'RAGPipelineBuilder':
+        self.temperature = temperature
+        return self
+    
+    def build(self) -> RAGPipeline:
+        """Build the RAG pipeline with the configured settings"""
+        return self
 
 # Configuration helper
 def create_rag_pipeline(config_path: str = None) -> RAGPipeline:
