@@ -42,7 +42,7 @@ class RAGPipeline:
         
         # Text splitter
         self.text_splitter = create_text_splitter(
-            splitter_type=self.config.get("splitter_type", "recursive"),
+            splitter_type=self.config.get("splitter_type", "token"),
             chunk_size=self.config.get("chunk_size", 1000),
             chunk_overlap=self.config.get("chunk_overlap", 200)
         )
@@ -80,8 +80,10 @@ class RAGPipeline:
         try:
             # Retrieve relevant documents
             relevant_docs = self.retriever.retrieve(question, k=1)
-            print(relevant_docs)
             
+            for doc in relevant_docs:
+                print("Full page content:", repr(doc.page_content))
+
             if not relevant_docs:
                 return {
                     "answer": "I couldn't find any relevant information to answer your question.",
@@ -92,13 +94,14 @@ class RAGPipeline:
             if extract_links(relevant_docs[0].page_content):
                 # If links are found, extract and format them
                 links = extract_links(relevant_docs[0].page_content)
+                print(links)
                 context = fetch_url_content(links[0]) if links else ""
             else:
                 # Format context without links
                 context = self._format_context(relevant_docs)
             
             # Generate prompt
-            prompt = self.prompt_template.create_prompt(question, context)
+            prompt = self.prompt_template.test_prompt(question, links)
             
             # Generate response
             answer = self.llm_client.generate_text(prompt)

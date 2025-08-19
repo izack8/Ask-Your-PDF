@@ -33,6 +33,10 @@ class RecursiveTextSplitter(TextSplitterInterface):
             raise ValueError("Documents list cannot be empty")
         
         try:
+            # chunks = self._splitter.split_documents(documents)
+            # for chunk in chunks:
+            #     print("Chunk content:", repr(chunk.page_content))
+            # return chunks
             return self._splitter.split_documents(documents)
         except Exception as e:
             raise RuntimeError(f"Failed to split documents: {e}")
@@ -41,8 +45,8 @@ class TokenBasedSplitter(TextSplitterInterface):
     """Token-based text splitter implementation"""
     
     def __init__(self, 
-                 chunk_size: int = 500,
-                 chunk_overlap: int = 50):
+                 chunk_size: int = 1000,
+                 chunk_overlap: int = 0):
         self.chunk_size = chunk_size
         self.chunk_overlap = chunk_overlap
         
