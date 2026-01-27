@@ -16,58 +16,49 @@ class RAGPipeline:
     def __init__(self, config: dict):
         self.config = config
         
-        # Initialize components
         self._initialize_components()
     
     def _initialize_components(self):
         """Initialize all RAG components"""
-        # Embedding generator
+
         self.embeddings = create_embedding_generator(
             provider=self.config.get("embedding_provider", "openai"),
             model=self.config.get("embedding_model", "text-embedding-3-large")
         )
         
-        # Vector store
         self.vector_store = create_vector_store(
             collection_name=self.config.get("collection_name", "documents"),
             embedding_function=self.embeddings.embeddings._embeddings,
             persist_directory=self.config.get("persist_directory", "./chroma_db")
         )
         
-        # Retriever
         self.retriever = Retriever(
             vector_store=self.vector_store,
-            reranker=None  # Add reranker if needed
+            reranker=None 
         )
         
-        # Text splitter
         self.text_splitter = create_text_splitter(
             splitter_type=self.config.get("splitter_type", "token"),
             chunk_size=self.config.get("chunk_size", 1000),
             chunk_overlap=self.config.get("chunk_overlap", 200)
         )
         
-        # LLM client
         self.llm_client = create_llm_client(
             provider=self.config.get("llm_provider", "deepseek"),
             model=self.config.get("llm_model", "deepseek-chat"),
             temperature=self.config.get("temperature", 0.1)
         )
         
-        # Prompt template
         self.prompt_template = RAGPromptTemplate()
     
     def ingest_document(self, file_path: str) -> None:
         """Ingest a document into the vector store"""
         try:
-            # Load document
             loader = create_document_loader(file_path)
             documents = loader.load()
             
-            # Split into chunks
             chunks = self.text_splitter.split_documents(documents)
             
-            # Add to vector store
             self.vector_store.add_documents(chunks)
             
             print(f"Successfully ingested {len(chunks)} chunks from {file_path}")
@@ -78,7 +69,6 @@ class RAGPipeline:
     def query(self, question: str, k: int = 5) -> dict:
         """Query the RAG system"""
         try:
-            # Retrieve relevant documents
             relevant_docs = self.retriever.retrieve(question, k=1)
             
             for doc in relevant_docs:
@@ -92,21 +82,14 @@ class RAGPipeline:
                 }
             
             if extract_links(relevant_docs[0].page_content):
-                # If links are found, extract and format them
                 links = extract_links(relevant_docs[0].page_content)
                 print(links)
                 context = fetch_url_content(links[0]) if links else ""
             else:
-                # Format context without links
                 context = self._format_context(relevant_docs)
-            
-            # Generate prompt
+
             prompt = self.prompt_template.test_prompt(question, links)
-            
-            # Generate response
             answer = self.llm_client.generate_text(prompt)
-            
-            # Extract sources
             sources = self._extract_sources(relevant_docs)
             
             return {
@@ -143,11 +126,9 @@ class RAGPipeline:
     
     def _calculate_confidence(self, documents: List[Document]) -> float:
         """Calculate confidence score based on retrieved documents"""
-        # Simple confidence calculation - can be improved
         if not documents:
             return 0.0
         
-        # Higher confidence if more documents found
         confidence = min(len(documents) / 5.0, 1.0)
         return round(confidence, 2)
     
