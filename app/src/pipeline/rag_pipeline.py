@@ -202,7 +202,7 @@ class RAGPipelineBuilder:
         """Build the RAG pipeline with the configured settings"""
         return self
 
-# Configuration helper
+
 def create_rag_pipeline(config_path: str = None) -> RAGPipeline:
     """Factory function to create RAG pipeline with configuration"""
     if config_path:
@@ -211,7 +211,7 @@ def create_rag_pipeline(config_path: str = None) -> RAGPipeline:
         with open(config_path, 'r') as f:
             config = json.load(f)
     else:
-        # Default configuration
+        # default configuration
         config = {
             "embedding_provider": "openai",
             "embedding_model": "text-embedding-3-large",
