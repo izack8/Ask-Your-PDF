@@ -71,8 +71,9 @@ class RAGPipeline:
         try:
             relevant_docs = self.retriever.retrieve(question, k=1)
             
-            for doc in relevant_docs:
-                print("Full page content:", repr(doc.page_content))
+            # debug
+            # for doc in relevant_docs:
+            #     print("Full page content:", repr(doc.page_content))
 
             if not relevant_docs:
                 return {
@@ -83,12 +84,12 @@ class RAGPipeline:
             
             if extract_links(relevant_docs[0].page_content):
                 links = extract_links(relevant_docs[0].page_content)
-                print(links)
                 context = fetch_url_content(links[0]) if links else ""
+
             else:
                 context = self._format_context(relevant_docs)
 
-            prompt = self.prompt_template.test_prompt(question, links)
+            prompt = self.prompt_template.test_prompt(question, context)
             answer = self.llm_client.generate_text(prompt)
             sources = self._extract_sources(relevant_docs)
             

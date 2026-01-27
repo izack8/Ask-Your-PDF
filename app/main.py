@@ -10,6 +10,13 @@ def main():
 
     rag_pipeline = create_rag_pipeline(config_path=path)
 
+    if "vector_store" not in st.session_state:
+        rag_pipeline.ingest_document(file_path="./isaactay_resume_2026.pdf")
+        st.session_state.vector_store = "ingested"
+        # debug 
+        # print("Document ingested into vector store.")
+    
+
     if "messages" not in st.session_state:
         st.session_state.messages = []
 
@@ -39,7 +46,7 @@ def main():
 
             st.session_state.messages.append(
                 {
-                    "role":"AI",
+                    "role":"assistant",
                     "content":full_response,
                 }
             )
